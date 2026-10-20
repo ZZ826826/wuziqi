@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>局域网五子棋 · 两人直连对弈</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2322D3EE'/%3E%3Cstop offset='1' stop-color='%233B82F6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='7' fill='url(%23g)'/%3E%3Ccircle cx='12' cy='12' r='5.5' fill='%2314181F'/%3E%3Ccircle cx='21' cy='21' r='5.5' fill='%23EEF4FF'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<style>
+  :root{
+    --bg0:#0A1020; --bg1:#131D36;
+    --panel:rgba(21,31,55,.62); --panel2:rgba(32,45,76,.66); --line:rgba(150,182,224,.16);
+    --ink:#E9EFF8; --muted:#9DAEC8; --faint:#6E7E9C;
+    --accent:#38BDF8; --accent2:#818CF8; --gold:#E8C56B;
+    --wood:#C6A678; --wood-edge:#A88558; --grid:rgba(110,88,58,.6);
+    --white-stone:#F2EBDD; --black-stone:#20242E;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:linear-gradient(180deg,var(--bg0) 0%,var(--bg1) 100%) fixed;
+    color:var(--ink);
+    font-family:"Noto Sans SC",system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;position:relative;overflow-x:hidden;
+  }
+  .aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .a{position:absolute;border-radius:50%;filter:blur(70px);mix-blend-mode:screen;opacity:.5}
+  .a1{width:520px;height:520px;left:-120px;top:-140px;background:radial-gradient(circle,#2DD4BF 0%,transparent 65%);animation:drift1 26s ease-in-out infinite alternate}
+  .a2{width:480px;height:480px;right:-140px;top:22%;background:radial-gradient(circle,#818CF8 0%,transparent 65%);animation:drift2 32s ease-in-out infinite alternate}
+  .a3{width:420px;height:420px;left:32%;bottom:-180px;background:radial-gradient(circle,#F5B96B 0%,transparent 65%);opacity:.32;animation:drift1 38s ease-in-out infinite alternate-reverse}
+  @keyframes drift1{from{transform:translate(0,0)}to{transform:translate(40px,28px)}}
+  @keyframes drift2{from{transform:translate(0,0)}to{transform:translate(-36px,34px)}}
+  .grain{
+    position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  @media(prefers-reduced-motion:reduce){.a{animation:none}}
+  .topbar,.layout{position:relative;z-index:1}
+  .topbar{max-width:1080px;margin:0 auto;padding:20px 18px 6px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .brand h1{font-family:"Noto Serif SC",serif;font-weight:900;font-size:26px;letter-spacing:2px;text-shadow:0 0 22px rgba(56,189,248,.25)}
+  .brand h1 .dot{color:var(--accent)}
+  .brand p{color:var(--muted);font-size:13px;margin-top:4px;letter-spacing:1px}
+  .conn-pill{display:inline-flex;align-items:center;gap:8px;font-size:13px;border:1px solid var(--line);border-radius:999px;padding:7px 14px;background:var(--panel);backdrop-filter:blur(10px);color:var(--muted);white-space:nowrap}
+  .conn-dot{width:8px;height:8px;border-radius:50%;background:#5B6B86;transition:background .2s}
+  .conn-pill.online{color:var(--ink);border-color:rgba(134,168,99,.5)}
+  .conn-pill.online .conn-dot{background:#86A863;box-shadow:0 0 8px #86A863}
+  .conn-pill.bad{color:#E0917E;border-color:#7E4636}
+  .top-right{display:flex;align-items:center;gap:10px}
+  .dodge-btn{font-family:inherit;font-size:13px;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;min-height:36px;transition:all .15s;white-space:nowrap}
+  .dodge-btn:hover{color:var(--ink);border-color:var(--accent)}
+  .dodge-mask{position:fixed;inset:0;background:#fff;z-index:100;display:flex;align-items:center;justify-content:center}
+  .dodge-mask .back-hint{position:fixed;right:14px;bottom:12px;font-size:12px;color:#bbb;user-select:none}
+  .layout{max-width:1080px;margin:14px auto 40px;padding:0 18px;display:grid;grid-template-columns:1fr;gap:20px}
+  @media(min-width:860px){.layout{grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);align-items:start}}
+  .board-col{display:flex;flex-direction:column;gap:12px;min-width:0}
+  .scorebar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 16px;backdrop-filter:blur(12px)}
+  .side{display:flex;align-items:center;gap:9px;font-size:14px}
+  .stone-sm{width:18px;height:18px;border-radius:50%;flex:none;box-shadow:inset -2px -3px 4px rgba(0,0,0,.35)}
+  .stone-sm.b{background:radial-gradient(circle at 35% 30%,#4A5060,#161A22)}
+  .stone-sm.w{background:radial-gradient(circle at 35% 30%,#fff,#D9CFBC);border:1px solid #C6B99F}
+  .side .cnt{font-variant-numeric:tabular-nums;color:var(--muted)}
+  .turn-hint{font-size:14px;color:var(--ink);text-align:center;flex:1}
+  .turn-hint .me{color:var(--accent);font-weight:700}
+  .canvas-wrap{background:linear-gradient(160deg,rgba(198,166,120,.22),rgba(168,133,88,.14));border:1px solid var(--line);border-radius:16px;padding:10px;box-shadow:0 18px 40px rgba(0,0,0,.4)}
+  canvas{display:block;margin:0 auto;border-radius:8px;touch-action:manipulation;cursor:pointer}
+  .actions{display:flex;gap:10px;flex-wrap:wrap}
+  .btn{font-family:inherit;font-size:14px;padding:11px 18px;border-radius:10px;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--ink);transition:all .15s;min-height:44px}
+  .btn:hover{border-color:var(--accent);background:rgba(56,189,248,.08)}
+  .btn.primary{background:linear-gradient(135deg,#22D3EE,#3B82F6);border-color:transparent;color:#fff}
+  .btn.primary:hover{background:linear-gradient(135deg,#38E0F5,#4F8FFA)}
+  .btn.ghost{background:transparent}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .side{display:block}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;backdrop-filter:blur(14px)}
+  .card h2{font-family:"Noto Serif SC",serif;font-size:17px;font-weight:700;margin-bottom:6px}
+  .card .sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:14px}
+  .mode-pick{display:flex;flex-direction:column;gap:10px}
+  .mode-btn{text-align:left;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);cursor:pointer;font-family:inherit;transition:all .15s}
+  .mode-btn:hover{border-color:var(--accent);background:rgba(56,189,248,.07)}
+  .mode-btn b{display:block;font-size:15px;margin-bottom:3px}
+  .mode-btn span{color:var(--muted);font-size:13px}
+  .step{display:flex;gap:10px;margin:12px 0}
+  .step-num{flex:none;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#22D3EE,#3B82F6);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;margin-top:2px}
+  .step-body{flex:1;min-width:0}
+  .step-body label{display:block;font-size:14px;margin-bottom:6px}
+  textarea{width:100%;min-height:84px;resize:vertical;background:rgba(10,16,32,.7);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:16px;font-family:ui-monospace,Menlo,Consolas,monospace;line-height:1.5}
+  @media(max-width:600px){.scorebar{flex-wrap:wrap;gap:8px}.turn-hint{order:3;flex-basis:100%;text-align:center}}
+  textarea:focus{outline:none;border-color:var(--accent)}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .mini{font-size:12.5px;padding:9px 14px;min-height:38px}
+  .hint-note{font-size:12.5px;color:var(--faint);line-height:1.7;margin-top:10px;border-top:1px dashed var(--line);padding-top:10px}
+  .chat-log{height:180px;overflow-y:auto;background:rgba(10,16,32,.6);border:1px solid var(--line);border-radius:9px;padding:10px;display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+  .chat-log::-webkit-scrollbar{width:6px}
+  .chat-log::-webkit-scrollbar-thumb{background:#3A4A66;border-radius:3px}
+  .bubble{max-width:82%;padding:8px 12px;border-radius:12px;font-size:14px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+  .bubble .who{display:block;font-size:11px;margin-bottom:2px;opacity:.7}
+  .bubble.me{align-self:flex-end;background:linear-gradient(135deg,#22D3EE,#3B82F6);color:#fff;border-bottom-right-radius:4px}
+  .bubble.peer{align-self:flex-start;background:var(--panel2);color:var(--ink);border-bottom-left-radius:4px}
+  .chat-input-row{display:flex;gap:8px}
+  .chat-input-row input{flex:1;min-width:0;background:rgba(10,16,32,.7);color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:16px;font-family:inherit}
+  .chat-input-row input:focus{outline:none;border-color:var(--accent)}
+  .chat-input-row input:disabled{opacity:.5}
+  .hidden{display:none!important}
+  .overlay{position:fixed;inset:0;background:rgba(8,12,24,.74);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px;backdrop-filter:blur(6px)}
+  .overlay-box{background:var(--panel-solid,#16203A);border:1px solid var(--line);border-radius:18px;padding:32px 28px;text-align:center;max-width:360px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.55);backdrop-filter:blur(16px)}
+  .overlay-box .big{font-family:"Noto Serif SC",serif;font-size:26px;font-weight:900;margin-bottom:8px}
+  .overlay-box .big.win{color:var(--gold)}
+  .overlay-box p{color:var(--muted);font-size:14px;margin-bottom:20px}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:11px 18px;border-radius:12px;font-size:14px;opacity:0;transition:all .25s;z-index:40;pointer-events:none;max-width:90vw;text-align:center;backdrop-filter:blur(10px)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="aurora" aria-hidden="true"><span class="a a1"></span><span class="a a2"></span><span class="a a3"></span></div>
+<div class="grain" aria-hidden="true"></div>
+<header class="topbar">
+  <div class="brand">
+    <h1>局域网五子棋<span class="dot"> ·</span></h1>
+    <p>两人直连对弈 · 无需服务器与账号 · 黑棋先行</p>
+  </div>
+  <div class="top-right">
+    <button class="dodge-btn" id="dodgeBtn">一键躲避</button>
+    <div class="conn-pill" id="connPill"><span class="conn-dot"></span><span id="connText">未连接</span></div>
+  </div>
+</header>
+<main class="layout">
+  <section class="board-col">
+    <div class="scorebar">
+      <div class="side"><span class="stone-sm b"></span>黑方 <span class="cnt" id="scoreBlack">0</span></div>
+      <div class="turn-hint" id="turnHint">选择右侧模式并连接对方后开始</div>
+      <div class="side">白方 <span class="cnt" id="scoreWhite">0</span><span class="stone-sm w"></span></div>
+    </div>
+    <div class="canvas-wrap"><canvas id="board" width="720" height="720"></canvas></div>
+    <div class="actions">
+      <button class="btn primary" id="restartBtn">重新开局</button>
+      <button class="btn ghost" id="resignBtn" disabled>认输</button>
+    </div>
+  </section>
+  <aside class="side">
+    <div class="card" id="modePickCard">
+      <h2>加入对局</h2>
+      <p class="sub">同一局域网下打开本页面，一人创建、一人加入，交换两段短码即可直连。</p>
+      <div class="mode-pick">
+        <button class="mode-btn" id="hostModeBtn"><b>我来创建对局（执黑 · 先手）</b><span>生成邀请短码发给对方，回传应答短码后完成连接</span></button>
+        <button class="mode-btn" id="guestModeBtn"><b>我加入对方对局（执白 · 后手）</b><span>粘贴邀请短码，生成应答短码回传即可</span></button>
+      </div>
+    </div>
+    <div class="card hidden" id="hostPanel">
+      <h2>创建对局 · 你执黑先手</h2>
+      <p class="sub">第 1 步生成邀请短码发给对方，把对方回传的应答短码粘到第 2 步完成连接。</p>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><label>生成邀请短码，整段复制发给对方</label><textarea id="hostOffer" readonly placeholder="点击下方按钮生成邀请短码…"></textarea><div class="row"><button class="btn mini primary" id="genOfferBtn">生成邀请</button><button class="btn mini ghost" id="copyOfferBtn" disabled>复制邀请</button></div></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><label>粘贴对方回传的应答短码并连接</label><textarea id="hostAnswer" placeholder="把对方回传的应答短码粘贴到这里…"></textarea><div class="row"><button class="btn mini" id="connectAnswerBtn">完成连接</button></div></div></div>
+      <p class="hint-note">两人需处于同一局域网（同一 Wi-Fi/路由器）。若一次未通，可重新生成邀请再试。</p>
+      <div class="row"><button class="btn mini ghost" id="backHostBtn">返回重新选择</button></div>
+    </div>
+    <div class="card hidden" id="guestPanel">
+      <h2>加入对局 · 你执白后手</h2>
+      <p class="sub">粘贴对方发来的邀请短码，生成应答短码回传，由对方完成最后一步。</p>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><label>粘贴对方发来的邀请短码</label><textarea id="guestOffer" placeholder="把对方发来的邀请短码粘贴到这里…"></textarea></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><label>生成应答短码并回传给对方</label><textarea id="guestAnswer" readonly placeholder="点击下方按钮生成应答短码…"></textarea><div class="row"><button class="btn mini primary" id="genAnswerBtn">生成应答</button><button class="btn mini ghost" id="copyAnswerBtn" disabled>复制应答</button></div></div></div>
+      <p class="hint-note">应答发出后等待对方点「完成连接」，连接成功即可落子。</p>
+      <div class="row"><button class="btn mini ghost" id="backGuestBtn">返回重新选择</button></div>
+    </div>
+    <div class="card" id="chatCard">
+      <h2>对局聊天</h2>
+      <p class="sub" id="chatSub">连接对方后可实时发消息，内容只经过两人直连通道</p>
+      <div class="chat-log" id="chatLog"></div>
+      <div class="chat-input-row"><input type="text" id="chatInput" maxlength="200" placeholder="连接后输入消息，回车发送" disabled><button class="btn mini primary" id="chatSendBtn" disabled>发送</button></div>
+    </div>
+  </aside>
+</main>
+<div class="overlay hidden" id="resultOverlay"><div class="overlay-box"><div class="big" id="resultTitle">黑方胜</div><p id="resultDesc">五子连珠</p><button class="btn primary" id="againBtn">再来一局</button></div></div>
+<div class="toast" id="toast"></div>
+<div class="dodge-mask hidden" id="dodgeMask"><span class="back-hint">双击返回</span></div>
+<script>
+const SIZE=15,EMPTY=0,BLACK=1,WHITE=2;
+const canvas=document.getElementById('board'),ctx=canvas.getContext('2d');
+let board=makeBoard(),myRole=null,myColor=EMPTY,turn=BLACK,gameOver=false,winLine=null,lastMove=null,scores={black:0,white:0},pc=null,channel=null;
+function makeBoard(){return Array.from({length:SIZE},()=>Array(SIZE).fill(EMPTY));}
+let pad=30,gap=0;
+function layoutCanvas(){const wrap=canvas.parentElement;const cssSize=Math.min(wrap.clientWidth-20,560);const dpr=window.devicePixelRatio||1;canvas.style.width=cssSize+'px';canvas.style.height=cssSize+'px';canvas.width=Math.round(cssSize*dpr);canvas.height=Math.round(cssSize*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);pad=cssSize*0.045;gap=(cssSize-pad*2)/(SIZE-1);draw();}
+function draw(){const px=parseFloat(canvas.style.height);ctx.clearRect(0,0,px,px);ctx.fillStyle='rgba(198,166,120,.16)';ctx.fillRect(0,0,px,px);ctx.strokeStyle='rgba(170,198,232,.42)';ctx.lineWidth=1;for(let i=0;i<SIZE;i++){const p=pad+i*gap;ctx.beginPath();ctx.moveTo(pad,p);ctx.lineTo(px-pad,p);ctx.stroke();ctx.beginPath();ctx.moveTo(p,pad);ctx.lineTo(p,px-pad);ctx.stroke();}const stars=[[3,3],[3,11],[11,3],[11,11],[7,7]];ctx.fillStyle='rgba(232,197,107,.85)';stars.forEach(([r,c])=>{ctx.beginPath();ctx.arc(pad+c*gap,pad+r*gap,4,0,Math.PI*2);ctx.fill();});for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){if(board[r][c]===EMPTY)continue;drawStone(pad+c*gap,pad+r*gap,gap*0.42,board[r][c]);}if(lastMove&&!winLine){const[r,c]=lastMove;ctx.strokeStyle='#E8C56B';ctx.lineWidth=2;ctx.beginPath();ctx.arc(pad+c*gap,pad+r*gap,gap*0.16,0,Math.PI*2);ctx.stroke();}if(winLine){const[r1,c1]=winLine[0],[r2,c2]=winLine[winLine.length-1];ctx.strokeStyle='#E8C56B';ctx.lineWidth=5;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(pad+c1*gap,pad+r1*gap);ctx.lineTo(pad+c2*gap,pad+r2*gap);ctx.stroke();}}
+function drawStone(x,y,rad,color){ctx.save();ctx.shadowColor='rgba(0,0,0,.4)';ctx.shadowBlur=6;ctx.shadowOffsetY=3;const g=ctx.createRadialGradient(x-rad*0.35,y-rad*0.35,rad*0.1,x,y,rad);if(color===BLACK){g.addColorStop(0,'#4A5568');g.addColorStop(1,'#14181F');}else{g.addColorStop(0,'#FFFFFF');g.addColorStop(1,'#D8DEE8');}ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,rad,0,Math.PI*2);ctx.fill();ctx.restore();if(color===WHITE){ctx.strokeStyle='rgba(120,100,70,.4)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,rad,0,Math.PI*2);ctx.stroke();}}
+canvas.addEventListener('pointerdown',(e)=>{if(gameOver)return;if(!channel||channel.readyState!=='open'){toast('尚未连接对方，先在右侧完成连接');return;}if(turn!==myColor){toast('还没轮到你落子');return;}const rect=canvas.getBoundingClientRect();const disp=parseFloat(canvas.style.width);const x=(e.clientX-rect.left)/rect.width*disp;const y=(e.clientY-rect.top)/rect.height*disp;const c=Math.round((x-pad)/gap);const r=Math.round((y-pad)/gap);if(r<0||r>=SIZE||c<0||c>=SIZE)return;if(board[r][c]!==EMPTY)return;applyMove(r,c,myColor,false);send({t:'move',r,c,color:myColor});afterMyMove();});
+function applyMove(r,c,color){board[r][c]=color;lastMove=[r,c];draw();}
+function afterMyMove(){turn=turn===BLACK?WHITE:BLACK;updateHint();if(myRole==='host')judgeAndBroadcast();}
+function judgeAndBroadcast(){const win=findWin(lastMove[0],lastMove[1],board[lastMove[0]][lastMove[1]]);if(win){const color=board[lastMove[0]][lastMove[1]];endGame(color===BLACK?'black':'white',win,false);send({t:'result',winner:color===BLACK?'black':'white',line:win});return;}if(isFull()){endGame('draw',null,false);send({t:'result',winner:'draw',line:null});}}
+function findWin(r,c,color){const dirs=[[0,1],[1,0],[1,1],[1,-1]];for(const[dr,dc]of dirs){const line=[[r,c]];for(let s=1;s<5;s++){const nr=r+dr*s,nc=c+dc*s;if(nr<0||nr>=SIZE||nc<0||nc>=SIZE||board[nr][nc]!==color)break;line.push([nr,nc]);}for(let s=1;s<5;s++){const nr=r-dr*s,nc=c-dc*s;if(nr<0||nr>=SIZE||nc<0||nc>=SIZE||board[nr][nc]!==color)break;line.unshift([nr,nc]);}if(line.length>=5)return line;}return null;}
+function isFull(){for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(board[r][c]===EMPTY)return false;return true;}
+function endGame(winner,line){gameOver=true;winLine=line;if(winner==='black')scores.black++;else if(winner==='white')scores.white++;updateScore();draw();showResult(winner,line);}
+function showResult(winner){const ov=document.getElementById('resultOverlay'),title=document.getElementById('resultTitle'),desc=document.getElementById('resultDesc');if(winner==='draw'){title.textContent='平局';title.className='big';desc.textContent='棋盘下满，不分胜负';}else{const name=winner==='black'?'黑方':'白方';const iWon=(winner==='black'&&myColor===BLACK)||(winner==='white'&&myColor===WHITE);title.textContent=iWon?'你赢了':name+'胜';title.className='big'+(iWon?' win':'');desc.textContent=winner==='black'?'黑方五子连珠':'白方五子连珠';}ov.classList.remove('hidden');}
+function send(obj){if(channel&&channel.readyState==='open')channel.send(JSON.stringify(obj));}
+function onChannelOpen(){setConn('online','已连接');document.getElementById('resignBtn').disabled=false;setChatEnabled(true);updateHint();}
+function setChatEnabled(on){document.getElementById('chatInput').disabled=!on;document.getElementById('chatSendBtn').disabled=!on;document.getElementById('chatSub').textContent=on?'连接已建立，消息只经过两人直连通道':'连接对方后可实时发消息，内容只经过两人直连通道';}
+function appendChat(text,mine){const log=document.getElementById('chatLog');const b=document.createElement('div');b.className='bubble '+(mine?'me':'peer');const who=document.createElement('span');who.className='who';who.textContent=mine?'我':'对方';b.appendChild(who);b.appendChild(document.createTextNode(text));log.appendChild(b);log.scrollTop=log.scrollHeight;}
+function sendChat(){const input=document.getElementById('chatInput');const text=input.value.trim();if(!text)return;if(!channel||channel.readyState!=='open'){toast('尚未连接对方');return;}send({t:'chat',text});appendChat(text,true);input.value='';input.focus();}
+document.getElementById('chatSendBtn').addEventListener('click',sendChat);
+document.getElementById('chatInput').addEventListener('keydown',(e)=>{if(e.key==='Enter'){e.preventDefault();sendChat();}});
+function handleMessage(str){let msg;try{msg=JSON.parse(str);}catch{return;}switch(msg.t){case 'move':{if(gameOver)break;if(board[msg.r][msg.c]!==EMPTY)break;applyMove(msg.r,msg.c,msg.color);turn=msg.color===BLACK?WHITE:BLACK;updateHint();if(myRole==='host')judgeAndBroadcast();break;}case 'result':{if(gameOver)break;endGame(msg.winner,msg.line||null);break;}case 'restart':{resetBoard(false);toast('对方发起了新一局');break;}case 'resign':{if(gameOver)break;endGame(msg.winner,null);showResignResult(msg.winner);break;}case 'chat':{if(msg.text)appendChat(String(msg.text).slice(0,200),false);break;}}}
+function showResignResult(winner){const ov=document.getElementById('resultOverlay'),title=document.getElementById('resultTitle'),desc=document.getElementById('resultDesc');if(winner==='draw')return;const iWon=(winner==='black'&&myColor===BLACK)||(winner==='white'&&myColor===WHITE);title.textContent=iWon?'对方认输，你赢了':'你认输，'+(winner==='black'?'黑方':'白方')+'胜';title.className='big'+(iWon?' win':'');desc.textContent='本局结束';ov.classList.remove('hidden');}
+const ICE=[{urls:'stun:stun.l.google.com:19302'}];
+function newPeer(){pc=new RTCPeerConnection({iceServers:ICE});pc.onconnectionstatechange=()=>{const st=pc.connectionState;if(st==='connected')onChannelOpen();else if(st==='disconnected'||st==='failed'||st==='closed')setConn('bad',st==='failed'?'连接失败':'连接已断开');};return pc;}
+function waitGathering(p){return new Promise(res=>{if(p.iceGatheringState==='complete')return res();p.addEventListener('icegatheringstatechange',()=>{if(p.iceGatheringState==='complete')res();});setTimeout(res,2500);});}
+const canCompress=typeof CompressionStream!=='undefined';
+function u8ToBase64url(u8){let bin='';const CH=0x8000;for(let i=0;i<u8.length;i+=CH)bin+=String.fromCharCode.apply(null,u8.subarray(i,i+CH));return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function base64urlToU8(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';const bin=atob(s);const u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);return u8;}
+async function compressDesc(obj){const json=JSON.stringify(obj);if(!canCompress)return json;const stream=new Blob([json]).stream().pipeThrough(new CompressionStream('deflate-raw'));const buf=await new Response(stream).arrayBuffer();return u8ToBase64url(new Uint8Array(buf));}
+async function decodeDesc(str){str=(str||'').trim();if(canCompress&&/^[A-Za-z0-9_-]+$/.test(str)){try{const stream=new Blob([base64urlToU8(str)]).stream().pipeThrough(new DecompressionStream('deflate-raw'));return JSON.parse(await new Response(stream).text());}catch{}}return JSON.parse(str);}
+async function parseDesc(raw,expectType){raw=(raw||'').trim();let obj=null;try{obj=await decodeDesc(raw);}catch{obj=null;}let type,sdp;if(obj&&typeof obj==='object'){type=obj.type;sdp=obj.sdp;}else{type=expectType;sdp=raw;}if(!sdp||typeof sdp!=='string'||sdp.length<20)throw new Error('连接信息不完整，请重新复制对方发来的整段内容');if(type&&type!==expectType){const e=expectType==='offer'?'邀请':'应答';const g=type==='answer'?'应答':type==='offer'?'邀请':type;throw new Error('这里应填'+e+'，你粘贴的是'+g+'，请核对步骤顺序');}return{type:expectType,sdp};}
+document.getElementById('hostModeBtn').addEventListener('click',()=>{myRole='host';myColor=BLACK;document.getElementById('modePickCard').classList.add('hidden');document.getElementById('hostPanel').classList.remove('hidden');updateHint();});
+document.getElementById('genOfferBtn').addEventListener('click',async()=>{try{if(pc){try{pc.close();}catch{}}newPeer();channel=pc.createDataChannel('game');bindChannel();const offer=await pc.createOffer();await pc.setLocalDescription(offer);await waitGathering(pc);const code=await compressDesc(pc.localDescription);document.getElementById('hostOffer').value=code;document.getElementById('copyOfferBtn').disabled=false;toast('邀请短码已生成，整段复制发给对方');}catch(err){toast('生成邀请失败：'+err.message);}});
+document.getElementById('copyOfferBtn').addEventListener('click',()=>{copyText(document.getElementById('hostOffer').value,'邀请已复制');});
+document.getElementById('connectAnswerBtn').addEventListener('click',async()=>{const raw=document.getElementById('hostAnswer').value.trim();if(!raw){toast('先粘贴对方的应答');return;}if(!pc){toast('请先点「生成邀请」');return;}try{const desc=await parseDesc(raw,'answer');await pc.setRemoteDescription(new RTCSessionDescription(desc));setConn('checking','正在连接…');}catch(err){toast('应答无效：'+err.message);}});
+document.getElementById('guestModeBtn').addEventListener('click',()=>{myRole='guest';myColor=WHITE;document.getElementById('modePickCard').classList.add('hidden');document.getElementById('guestPanel').classList.remove('hidden');updateHint();});
+document.getElementById('genAnswerBtn').addEventListener('click',async()=>{const raw=document.getElementById('guestOffer').value.trim();if(!raw){toast('先粘贴对方发来的邀请');return;}try{if(pc){try{pc.close();}catch{}}newPeer();pc.ondatachannel=(e)=>{channel=e.channel;bindChannel();};const desc=await parseDesc(raw,'offer');await pc.setRemoteDescription(new RTCSessionDescription(desc));const answer=await pc.createAnswer();await pc.setLocalDescription(answer);await waitGathering(pc);const code=await compressDesc(pc.localDescription);document.getElementById('guestAnswer').value=code;document.getElementById('copyAnswerBtn').disabled=false;toast('应答短码已生成，整段回传给对方');}catch(err){toast('邀请无效：'+err.message);}});
+document.getElementById('copyAnswerBtn').addEventListener('click',()=>{copyText(document.getElementById('guestAnswer').value,'应答已复制');});
+function bindChannel(){channel.onopen=onChannelOpen;channel.onmessage=(e)=>handleMessage(e.data);channel.onclose=()=>{setConn('bad','连接已断开');setChatEnabled(false);};}
+function backToPick(){try{if(channel)channel.close();}catch{}try{if(pc)pc.close();}catch{}channel=null;pc=null;myRole=null;myColor=EMPTY;['hostOffer','hostAnswer','guestOffer','guestAnswer'].forEach(id=>{document.getElementById(id).value='';});document.getElementById('copyOfferBtn').disabled=true;document.getElementById('copyAnswerBtn').disabled=true;document.getElementById('modePickCard').classList.remove('hidden');document.getElementById('hostPanel').classList.add('hidden');document.getElementById('guestPanel').classList.add('hidden');setChatEnabled(false);document.getElementById('chatLog').innerHTML='';setConn('','未连接');updateHint();}
+document.getElementById('backHostBtn').addEventListener('click',backToPick);
+document.getElementById('backGuestBtn').addEventListener('click',backToPick);
+document.getElementById('restartBtn').addEventListener('click',()=>{resetBoard(true);if(channel&&channel.readyState==='open')send({t:'restart'});toast('已开启新一局');});
+document.getElementById('againBtn').addEventListener('click',()=>{document.getElementById('resultOverlay').classList.add('hidden');resetBoard(true);if(channel&&channel.readyState==='open')send({t:'restart'});});
+document.getElementById('resignBtn').addEventListener('click',()=>{if(gameOver)return;if(!confirm('确定认输吗？本局判对方胜。'))return;const winner=myColor===BLACK?'white':'black';send({t:'resign',winner});endGame(winner,null);showResignResult(winner);});
+function resetBoard(announce){board=makeBoard();gameOver=false;winLine=null;lastMove=null;turn=BLACK;draw();updateHint();if(announce)document.getElementById('resultOverlay').classList.add('hidden');}
+function setConn(state,text){const pill=document.getElementById('connPill');pill.className='conn-pill'+(state==='online'?' online':state==='bad'?' bad':'');document.getElementById('connText').textContent=text;}
+function updateHint(){const el=document.getElementById('turnHint');if(gameOver){el.innerHTML='本局已结束';return;}if(!myRole){el.textContent='选择右侧模式并连接对方后开始';return;}const meName=myColor===BLACK?'黑':'白';if(!channel||channel.readyState!=='open'){el.innerHTML='你执<span class="me">'+meName+'</span> · 等待连接';return;}if(turn===myColor)el.innerHTML='轮到你落子（<span class="me">'+meName+'</span>）';else el.innerHTML='等待对方落子（'+(turn===BLACK?'黑':'白')+'）';}
+function updateScore(){document.getElementById('scoreBlack').textContent=scores.black;document.getElementById('scoreWhite').textContent=scores.white;}
+function copyText(text,okMsg){const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();let done=false;try{done=document.execCommand('copy');}catch{}document.body.removeChild(ta);if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(text).then(()=>toast(okMsg)).catch(()=>{if(!done)toast('复制失败，请手动全选复制');});}else if(!done){toast('复制失败，请手动全选复制');}else toast(okMsg);}
+let toastTimer;function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2200);}
+const dodgeMask=document.getElementById('dodgeMask');
+document.getElementById('dodgeBtn').addEventListener('click',()=>{window.close();dodgeMask.classList.remove('hidden');});
+function restoreDodge(){dodgeMask.classList.add('hidden');}
+dodgeMask.addEventListener('dblclick',restoreDodge);
+document.addEventListener('keydown',(e)=>{if(e.key==='Escape')restoreDodge();});
+window.addEventListener('resize',layoutCanvas);
+layoutCanvas();updateHint();
+</script>
+</body>
+</html>
