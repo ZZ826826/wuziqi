@@ -10,7 +10,6 @@
   :root{
     --bg0:#0A1020; --bg1:#131D36;
     --panel:rgba(255,255,255,.07); --panel2:rgba(255,255,255,.10); --line:rgba(255,255,255,.14);
-    /* 玻璃分三级：小控件 / 卡片 / 遮罩 */
     --glass-1:blur(10px) saturate(160%);
     --glass-2:blur(22px) saturate(180%);
     --glass-3:blur(34px) saturate(200%);
@@ -28,7 +27,6 @@
     -webkit-font-smoothing:antialiased;
     min-height:100vh;position:relative;overflow-x:hidden;
   }
-  /* ===== 氛围背景 ===== */
   .aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
   .a{position:absolute;border-radius:50%;filter:blur(70px);mix-blend-mode:screen;opacity:.5}
   .a1{width:520px;height:520px;left:-120px;top:-140px;background:radial-gradient(circle,#2DD4BF 0%,transparent 65%);animation:drift1 26s ease-in-out infinite alternate}
@@ -43,7 +41,6 @@
   @media(prefers-reduced-motion:reduce){.a{animation:none}}
   .topbar,.layout{position:relative;z-index:1}
 
-  /* ===== 顶栏 ===== */
   .topbar{
     max-width:1080px;margin:0 auto;padding:20px 18px 6px;
     display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
@@ -80,7 +77,6 @@
   }
   .dodge-mask .back-hint{position:fixed;right:14px;bottom:12px;font-size:12px;color:#bbb;user-select:none}
 
-  /* ===== 布局 ===== */
   .layout{
     max-width:1080px;margin:14px auto 40px;padding:0 18px;
     display:grid;grid-template-columns:1fr;gap:20px;
@@ -90,7 +86,6 @@
   }
   .board-col{display:flex;flex-direction:column;gap:12px;min-width:0}
 
-  /* ===== 比分条 ===== */
   .scorebar{
     display:flex;align-items:center;justify-content:space-between;gap:10px;
     background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:9px 14px;
@@ -100,12 +95,11 @@
   .side-info{display:flex;align-items:center;gap:9px;font-size:14px;flex:none}
   .side-info .cnt{font-variant-numeric:tabular-nums;color:var(--muted);min-width:1ch;text-align:center}
   .stone-sm{width:18px;height:18px;border-radius:50%;flex:none}
-  .stone-sm.b{background:radial-gradient(circle at 35% 28%,#6B778E,#161A22 62%,#0B0E15);box-shadow:inset -2px -3px 4px rgba(0,0,0,.4),0 1px 3px rgba(0,0,0,.4)}
+  .stone-sm.b{background:radial-gradient(circle at 35% 28%,#B7C3D9,#3A465E 62%,#10151F);box-shadow:inset -2px -3px 4px rgba(0,0,0,.4),0 1px 3px rgba(0,0,0,.4),0 0 0 1px rgba(178,200,230,.5)}
   .stone-sm.w{background:radial-gradient(circle at 35% 28%,#fff,#E8E2D4 62%,#C9C2B2);border:1px solid rgba(160,148,124,.5);box-shadow:0 1px 3px rgba(0,0,0,.3)}
   .turn-hint{font-size:14px;color:var(--ink);text-align:center;flex:1}
   .turn-hint .me{color:var(--accent);font-weight:700}
 
-  /* ===== 棋盘 ===== */
   .canvas-wrap{
     background:linear-gradient(160deg,rgba(40,58,96,.55),rgba(18,27,46,.7));
     border:1px solid var(--line);
@@ -117,7 +111,6 @@
   canvas{display:block;margin:0 auto;max-width:100%;border-radius:10px;touch-action:manipulation;cursor:pointer}
   .actions{display:flex;gap:10px;flex-wrap:wrap}
 
-  /* ===== 按钮 ===== */
   .btn{
     font-family:inherit;font-size:14px;padding:11px 18px;border-radius:12px;cursor:pointer;
     border:1px solid var(--line);background:var(--panel2);color:var(--ink);transition:transform .12s,border-color .15s,background .15s,opacity .15s;
@@ -142,7 +135,6 @@
   }
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  /* ===== 侧栏 ===== */
   .sidebar{display:block;min-width:0}
   .card{
     background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;
@@ -185,7 +177,6 @@
     .turn-hint{order:3;flex-basis:100%;text-align:center}
   }
 
-  /* ===== 聊天 ===== */
   .chat-bar{display:flex;gap:8px;align-items:center}
   .chat-bar input{
     flex:1;min-width:0;background:rgba(255,255,255,.08);color:var(--ink);
@@ -195,7 +186,6 @@
   .chat-bar input:focus{outline:none;border-color:var(--accent)}
   .chat-bar input:disabled{opacity:.5}
 
-  /* ===== 弹幕 ===== */
   .danmaku-layer{position:fixed;left:0;right:0;top:80px;bottom:150px;z-index:30;pointer-events:none;overflow:hidden}
   .dm{
     position:absolute;right:0;max-width:62%;padding:7px 15px;border-radius:999px;font-size:14px;line-height:1.4;
@@ -209,14 +199,12 @@
   @keyframes dmfly{from{transform:translateX(0)}to{transform:translateX(calc(-100vw - 100%))}}
   @media(prefers-reduced-motion:reduce){.dm{animation-duration:9s}}
 
-  /* ===== 邀请结果条 ===== */
   .invite-result{display:none;gap:8px;align-items:center;background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:11px;padding:10px 12px;margin-top:8px}
   .invite-result.show{display:flex}
   .invite-result code{flex:1;min-width:0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .step.generated .gen-body{display:none}
   .hidden{display:none!important}
 
-  /* ===== 遮罩 ===== */
   .overlay{
     position:fixed;inset:0;background:rgba(8,12,24,.72);display:flex;align-items:center;justify-content:center;
     z-index:50;padding:20px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
@@ -234,7 +222,6 @@
   .confirm-actions{display:flex;gap:10px;justify-content:center}
   .confirm-actions .btn{flex:1;max-width:140px}
 
-  /* ===== Toast ===== */
   .toast{
     position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
     background:rgba(20,30,50,.8);border:1px solid var(--line);color:var(--ink);
@@ -380,7 +367,6 @@
   </aside>
 </main>
 
-<!-- 结果遮罩 -->
 <div class="overlay hidden" id="resultOverlay">
   <div class="overlay-box">
     <div class="big" id="resultTitle">黑方胜</div>
@@ -389,7 +375,6 @@
   </div>
 </div>
 
-<!-- 通用确认弹窗（悔棋等） -->
 <div class="overlay hidden" id="confirmOverlay">
   <div class="overlay-box">
     <div class="big" id="confirmTitle">确认</div>
@@ -410,7 +395,6 @@
 </div>
 
 <script>
-/* ================= 常量与状态 ================= */
 const SIZE = 15;
 const EMPTY = 0, BLACK = 1, WHITE = 2;
 const canvas = document.getElementById('board');
@@ -443,7 +427,6 @@ function canIPlay(){
   return !gameOver && channel && channel.readyState==='open' && turn===myColor;
 }
 
-/* ================= 画布布局与绘制 ================= */
 function layoutCanvas(){
   const col = canvas.closest('.board-col');
   const avail = (col ? col.clientWidth : window.innerWidth) - 20;
@@ -483,13 +466,13 @@ function draw(){
   ctx.clearRect(0,0,px,px);
 
   const bg = ctx.createRadialGradient(px*0.35, px*0.28, px*0.08, px*0.5, px*0.55, px*0.92);
-  bg.addColorStop(0, '#17223C');
-  bg.addColorStop(0.6, '#101A2E');
-  bg.addColorStop(1, '#0A1120');
+  bg.addColorStop(0, '#1D2C4A');
+  bg.addColorStop(0.6, '#14203A');
+  bg.addColorStop(1, '#0D1626');
   ctx.fillStyle = bg;
   ctx.fillRect(0,0,px,px);
 
-  ctx.strokeStyle = 'rgba(186,208,240,.16)';
+  ctx.strokeStyle = 'rgba(190,210,245,.22)';
   ctx.lineWidth = 1;
   for(let i=0;i<SIZE;i++){
     const p = pad + i*gap;
@@ -564,9 +547,10 @@ function drawStone(x, y, rad, color, alpha, scale){
 
   const g = ctx.createRadialGradient(x-r*0.35, y-r*0.4, r*0.05, x+r*0.1, y+r*0.15, r*1.05);
   if(color===BLACK){
-    g.addColorStop(0,'#6B778E');
-    g.addColorStop(0.42,'#2A3142');
-    g.addColorStop(1,'#0B0E15');
+    g.addColorStop(0,'#B7C3D9');
+    g.addColorStop(0.38,'#46536E');
+    g.addColorStop(0.72,'#1E2634');
+    g.addColorStop(1,'#10151F');
   } else {
     g.addColorStop(0,'#FFFFFF');
     g.addColorStop(0.5,'#EDE8DC');
@@ -577,7 +561,7 @@ function drawStone(x, y, rad, color, alpha, scale){
   ctx.restore();
 
   ctx.save();
-  ctx.globalAlpha = alpha * (color===BLACK ? 0.5 : 0.85);
+  ctx.globalAlpha = alpha * (color===BLACK ? 0.72 : 0.85);
   const hg = ctx.createRadialGradient(x-r*0.35, y-r*0.42, 0, x-r*0.35, y-r*0.42, r*0.62);
   hg.addColorStop(0, 'rgba(255,255,255,1)');
   hg.addColorStop(1, 'rgba(255,255,255,0)');
@@ -586,23 +570,22 @@ function drawStone(x, y, rad, color, alpha, scale){
   ctx.restore();
 
   ctx.save();
-  ctx.globalAlpha = alpha * 0.22;
+  ctx.globalAlpha = alpha * (color===BLACK ? 0.3 : 0.22);
   const rg = ctx.createRadialGradient(x+r*0.25, y+r*0.45, 0, x+r*0.25, y+r*0.45, r*0.7);
-  rg.addColorStop(0, color===BLACK ? 'rgba(140,180,255,1)' : 'rgba(255,255,255,1)');
+  rg.addColorStop(0, color===BLACK ? 'rgba(150,195,255,1)' : 'rgba(255,255,255,1)');
   rg.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = rg;
   ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
   ctx.restore();
 
   ctx.save();
-  ctx.globalAlpha = alpha * (color===BLACK ? 0.5 : 0.75);
-  ctx.strokeStyle = color===BLACK ? 'rgba(120,140,180,.45)' : 'rgba(150,140,120,.4)';
-  ctx.lineWidth = 1;
+  ctx.globalAlpha = alpha * (color===BLACK ? 0.8 : 0.75);
+  ctx.strokeStyle = color===BLACK ? 'rgba(178,200,230,.72)' : 'rgba(150,140,120,.4)';
+  ctx.lineWidth = color===BLACK ? 1.5 : 1;
   ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.stroke();
   ctx.restore();
 }
 
-/* ================= 坐标换算 ================= */
 function cellFromEvent(e){
   const rect = canvas.getBoundingClientRect();
   const x = (e.clientX - rect.left) / rect.width * cssSize;
@@ -613,7 +596,6 @@ function cellFromEvent(e){
   return [r,c];
 }
 
-/* ================= 落子 ================= */
 canvas.addEventListener('pointerdown', (e)=>{
   if(gameOver) return;
   if(!channel || channel.readyState!=='open'){ toast('尚未连接对方，先在右侧完成连接'); return; }
@@ -728,7 +710,6 @@ function showResult(winner){
   ov.classList.remove('hidden');
 }
 
-/* ================= 悔棋 ================= */
 document.getElementById('undoBtn').addEventListener('click', ()=>{
   if(undoPending) return;
   if(!channel || channel.readyState!=='open'){ toast('尚未连接对方'); return; }
@@ -779,7 +760,6 @@ function updateUndoBtn(){
   if(!undoPending) btn.textContent = '悔棋';
 }
 
-/* ================= 通用确认弹窗 ================= */
 let confirmResolve = null;
 function askConfirm(title, desc, yesText, noText){
   const ov = document.getElementById('confirmOverlay');
@@ -801,7 +781,6 @@ document.getElementById('confirmOverlay').addEventListener('click', (e)=>{
   if(e.target.id==='confirmOverlay') closeConfirm(false);
 });
 
-/* ================= 网络消息 ================= */
 function send(obj){
   if(channel && channel.readyState==='open') channel.send(JSON.stringify(obj));
 }
@@ -829,7 +808,6 @@ function onChannelClose(){
   updateUndoBtn();
 }
 
-/* ===== 聊天弹幕 ===== */
 const DM_TRACKS = 5;
 let dmCursor = 0;
 function setChatEnabled(on){
@@ -966,7 +944,6 @@ function showResignResult(winner){
   ov.classList.remove('hidden');
 }
 
-/* ================= WebRTC 信令 ================= */
 const ICE = [{urls:'stun:stun.l.google.com:19302'}];
 
 function newPeer(){
@@ -1039,7 +1016,6 @@ async function parseDesc(raw, expectType){
   return {type:expectType, sdp};
 }
 
-/* Host */
 document.getElementById('hostModeBtn').addEventListener('click', ()=>{
   myRole='host'; myColor=BLACK;
   document.getElementById('modePickCard').classList.add('hidden');
@@ -1089,7 +1065,6 @@ document.getElementById('connectAnswerBtn').addEventListener('click', async ()=>
   }catch(err){ toast('应答无效：'+err.message); }
 });
 
-/* Guest */
 document.getElementById('guestModeBtn').addEventListener('click', ()=>{
   myRole='guest'; myColor=WHITE;
   document.getElementById('modePickCard').classList.add('hidden');
@@ -1162,7 +1137,6 @@ function backToPick(){
 document.getElementById('backHostBtn').addEventListener('click', backToPick);
 document.getElementById('backGuestBtn').addEventListener('click', backToPick);
 
-/* ================= 操作按钮 ================= */
 document.getElementById('restartBtn').addEventListener('click', async ()=>{
   const open = channel && channel.readyState==='open';
   if(open){
@@ -1208,7 +1182,6 @@ function resetBoard(announce){
   if(announce) document.getElementById('resultOverlay').classList.add('hidden');
 }
 
-/* ================= UI 辅助 ================= */
 function setConn(state, text){
   const pill = document.getElementById('connPill');
   pill.className = 'conn-pill' + (state==='online'?' online':state==='bad'?' bad':'');
@@ -1256,7 +1229,6 @@ function toast(msg){
   toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
 }
 
-/* ================= 一键躲避 ================= */
 const dodgeMask = document.getElementById('dodgeMask');
 document.getElementById('dodgeBtn').addEventListener('click', ()=>{
   dodgeMask.classList.remove('hidden');
@@ -1271,7 +1243,6 @@ document.addEventListener('keydown', (e)=>{
   }
 });
 
-/* ================= 启动 ================= */
 let resizeRaf = null;
 window.addEventListener('resize', ()=>{
   if(resizeRaf) return;
